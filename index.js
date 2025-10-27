@@ -6,7 +6,7 @@ const app = express();
 
 app.use(express.json());
 
-const mongoURI ="";
+const mongoURI ="mongodb+srv://proyecto:1234@clusterproyecto.nehinbj.mongodb.net/?appName=ClusterProyecto";
 
 mongoose.connect(mongoURI)
     .then(() => console.log('Conectado a MongoDB'))
