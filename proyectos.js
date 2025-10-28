@@ -30,6 +30,12 @@ router.post('/', async (req, res) => {
     try {
         const nuevoProyecto = new Proyecto(req.body);
         const proyectoGuardado = await nuevoProyecto.save();
+        
+        // --- Evento Socket.io ---
+        // req.io viene del middleware en index.js
+        req.io.emit('proyecto:creado', proyectoGuardado);
+        // --- Fin Evento ---
+
         res.status(201).json(proyectoGuardado);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -38,6 +44,7 @@ router.post('/', async (req, res) => {
 
 /** Obtener todos los proyectos */
 router.get('/', async (req, res) => {
+// ... (sin cambios)
     try {
         const proyectos = await Proyecto.find();
         res.json(proyectos);
@@ -48,6 +55,7 @@ router.get('/', async (req, res) => {
 
 /** Buscar proyectos por título */
 router.get('/buscar', async (req, res) => {
+// ... (sin cambios)
     try {
         const { titulo } = req.query;
         const filtro = {};
@@ -65,6 +73,7 @@ router.get('/buscar', async (req, res) => {
 
 /** Obtener un proyecto por ID */
 router.get('/:id', async (req, res) => {
+// ... (sin cambios)
     try {
         const { id } = req.params;
         const proyecto = await Proyecto.findById(id);
@@ -88,6 +97,11 @@ router.put('/:id', async (req, res) => {
         if (!proyectoActualizado) {
             return res.status(404).json({ error: 'Proyecto no encontrado' });
         }
+
+        // --- Evento Socket.io ---
+        req.io.emit('proyecto:actualizado', proyectoActualizado);
+        // --- Fin Evento ---
+
         res.json(proyectoActualizado);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -102,6 +116,12 @@ router.delete('/:id', async (req, res) => {
         if (!proyectoEliminado) {
             return res.status(404).json({ error: 'Proyecto no encontrado' });
         }
+
+        // --- Evento Socket.io ---
+        // Enviamos solo el ID para que el cliente sepa cuál borrar
+        req.io.emit('proyecto:eliminado', { id: proyectoEliminado._id });
+        // --- Fin Evento ---
+
         res.json({ mensaje: 'Proyecto eliminado correctamente' });
     } catch (error) {
         res.status(400).json({ error: error.message });
